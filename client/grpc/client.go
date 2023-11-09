@@ -3,11 +3,9 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"github.com/madyar997/user-client/client"
 	"github.com/madyar997/user-client/models"
 	"github.com/madyar997/user-client/protobuf"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Client struct {
@@ -15,6 +13,22 @@ type Client struct {
 	conn     *grpc.ClientConn
 	client   protobuf.UserClient
 	dialOpts []grpc.DialOption
+}
+
+func NewClient(opts ...Option) (*Client, error) {
+	cli := &Client{
+		dialOpts: make([]grpc.DialOption, 0)}
+
+	for _, opt := range opts {
+		opt(cli)
+	}
+
+	err := cli.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	return cli, nil
 }
 
 func (c *Client) Connect() error {
@@ -50,17 +64,4 @@ func (c *Client) GetUserByID(ctx context.Context, id int32) (*models.User, error
 		Email: resp.Email,
 		Age:   resp.Age,
 	}, nil
-}
-
-func NewClient(conf *client.Config) (client.Client, error) {
-	cli := &Client{
-		address:  conf.Address,
-		dialOpts: []grpc.DialOption{},
-	}
-
-	if conf.Insecure {
-		cli.dialOpts = append(cli.dialOpts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	}
-
-	return cli, nil
 }
