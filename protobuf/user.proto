@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package="/protobuf";
+
+message UserResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  int32 age = 4;
+  string password = 5;
+}
+
+message UserRequest {
+  int32 id = 1;
+}
+
+service User {
+  rpc GetUserByID(UserRequest) returns (UserResponse) {}
+}
+
